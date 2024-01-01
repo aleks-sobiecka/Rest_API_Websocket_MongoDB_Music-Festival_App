@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./db');
+const mongoose = require('mongoose');
 const path = require('path');
 const socket = require('socket.io');
 
@@ -42,6 +42,15 @@ app.get('*', (req, res) => {
 app.use((req, res) => {
     res.status(404).json({ message: 'Not found...' });
 });
+
+// connects server with the database
+mongoose.connect('mongodb://0.0.0.0:27017/NewWaveDB', { useNewUrlParser: true, useUnifiedTopology: true });
+const db = mongoose.connection;
+
+db.once('open', () => {
+  console.log('Connected to the database');
+});
+db.on('error', err => console.log('Error ' + err));
 
 //start server
 const server = app.listen(process.env.PORT || 8000, () => {

@@ -1,69 +1,77 @@
 const express = require('express');
 const router = express.Router();
-const db = require('./../db');
-const { v4: uuidv4 } = require('uuid');
+const Concert = require('../models/concerts.model');
 
-// get all db.concerts array
-router.route('/concerts').get((req, res) => {
-    res.json(db.concerts);
-});
-
-// get single db.concerts array element
-router.route('/concerts/:id').get((req, res) => {
-    const concert = db.concerts.find(entry => entry.id === parseInt(req.params.id));
-    if (concert) {
-        res.json(concert);
-    } else {
-        res.status(404).json({ message: 'Concert not found.' });
+// get all concerts
+router.get('/concerts', async (req, res) => {
+    try {
+      res.json(await Concert.find());
     }
-});
+    catch(err) {
+      res.status(500).json({ message: err });
+    }
+  });
 
-// post add new element to db.concerts array
-router.route('/concerts').post((req, res) => {
+// get single concert by id
+router.get('/concerts/:id', async (req, res) => {
+    try {
+      const concert = await Concert.findById(req.params.id);
+      if(!concert) res.status(404).json({ message: 'Concert not found' });
+      else res.json(concert);
+    }
+    catch(err) {
+      res.status(500).json({ message: err });
+    }
+  });  
+
+
+// post add new element to concerts
+router.post('/concerts', async (req, res) => {
+    try {
+      const { performer, genre, price, day, image } = req.body;
+      const newConcert = new Concert({ performer: performer, genre: genre, price: price, day: day, image: image });
+      await newConcert.save();
+      res.json({ message: 'OK' });
+    } catch(err) {
+      res.status(500).json({ message: err });
+    }
+  });
+  
+
+// put modify concert by id
+router.put('/concerts/:id', async (req, res) => {
     const { performer, genre, price, day, image } = req.body;
-
-    if (!performer || !genre || !price || !day || !image) {
-        res.status(400).json({ message: 'One or more mandatory fields are missing.' });
-    } else {
-        const newConcert = {
-            id: uuidv4(),
-            performer,
-            genre,
-            price,
-            day,
-            image,
-        };
-        db.concerts.push(newConcert);
-        res.json({ message: 'OK' });
+    try {
+      const concert = await Concert.findById(req.params.id);
+      if(concert) {
+        concert.performer = performer;
+        concert.genre = genre;
+        concert.price = price;
+        concert.day = day;
+        concert.image = image;
+        await concert.save();
+        res.json({ message: 'OK'})
     }
-});
-
-// put modify db.concerts array element
-router.route('/concerts/:id').put((req, res) => {
-    const { performer, genre, price, day, image } = req.body;
-
-    const concert = db.concerts.find(entry => entry.id === parseInt(req.params.id));
-    if (!concert) {
-        res.status(404).json({ message: 'Concert not found.' });
-    } else {
-        if (performer) concert.performer = performer;
-        if (genre) concert.genre = genre;
-        if (price) concert.price = price;
-        if (day) concert.day = day;
-        if (image) concert.image = image;
-        res.json({ message: 'OK' });
+      else res.status(404).json({ message: 'Concert not found...' });
     }
-});
-
-// delete element from db.concerts array
-router.route('/concerts/:id').delete((req, res) => {
-    const index = db.concerts.findIndex(entry => entry.id === parseInt(req.params.id));
-    if (index === -1) {
-        res.status(404).json({ message: 'Concert not found.' });
-    } else {
-        db.concerts.splice(index, 1);
-        res.json({ message: 'OK' });
+    catch(err) {
+      res.status(500).json({ message: err });
     }
-});
+  });
+
+router.delete('/concerts/:id', async (req, res) => {
+    try {
+      const concert = await Concert.findById(req.params.id);
+      if(concert) {
+        await Concert.deleteOne({ _id: req.params.id });
+        res.json({ message: 'OK' });
+      }
+      else res.status(404).json({ message: 'Concert not found...' });
+    }
+    catch(err) {
+      res.status(500).json({ message: err });
+    }
+  });
+  
 
 module.exports = router;
