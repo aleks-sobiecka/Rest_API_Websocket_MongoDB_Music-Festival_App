@@ -24,6 +24,11 @@ exports.postOne = async (req, res) => {
     try {
         const { day, seat, client, email } = req.body;
         const newSeat = new Seat({ day: day, seat: seat, client: client, email: email });
+
+        if(await Seat.exists({day: day, seat: seat})) {
+          return res.status(400).json({message: err});
+        }
+
         await newSeat.save();
         //emitt new updated taken seats to all sockets
         req.io.emit('seatsUpdated', await Seat.find());
