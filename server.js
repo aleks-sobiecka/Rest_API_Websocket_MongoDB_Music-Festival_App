@@ -44,7 +44,17 @@ app.use((req, res) => {
 });
 
 // connects server with the database
-mongoose.connect('mongodb+srv://alekssobiecka:Kaktusy23.@cluster0.mwo8so1.mongodb.net/NewWaveDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+const NODE_ENV = process.env.NODE_ENV;
+let dbURI = '';
+
+
+if(NODE_ENV === 'production') dbURI = 'mongodb+srv://alekssobiecka:Kaktusy23.@cluster0.mwo8so1.mongodb.net/NewWaveDB?retryWrites=true&w=majority'
+else if(NODE_ENV === 'test') dbURI = 'mongodb://0.0.0.0:27017/NewWaveDBtest';
+else dbURI = 'mongodb://0.0.0.0:27017/NewWaveDB';
+
+
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
+//.connect('mongodb+srv://alekssobiecka:Kaktusy23.@cluster0.mwo8so1.mongodb.net/NewWaveDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
 db.once('open', () => {
@@ -62,6 +72,8 @@ const io = socket(server);
 
 //listener on event connection
 io.on('connection', (socket) => {
-    console.log('New socket!');
+    console.log('New socket!', socket.id);
 });
+
+module.exports = server;
   
