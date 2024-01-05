@@ -54,7 +54,7 @@ else dbURI = 'mongodb://0.0.0.0:27017/NewWaveDB';
 
 
 mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true });
-//.connect('mongodb+srv://alekssobiecka:Kaktusy23.@cluster0.mwo8so1.mongodb.net/NewWaveDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+//.connect('mongodb+srv://alekssobiecka:NewWaveDB@cluster0.mwo8so1.mongodb.net/NewWaveDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
 db.once('open', () => {
