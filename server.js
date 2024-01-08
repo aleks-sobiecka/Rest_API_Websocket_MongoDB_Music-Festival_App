@@ -1,3 +1,4 @@
+const helmet = require('helmet');
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -12,6 +13,7 @@ const concertRoutes = require('./routes/concerts.routes');
 const seatRoutes = require('./routes/seats.routes');
 
 //middleware
+app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cors());
